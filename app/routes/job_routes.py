@@ -17,7 +17,6 @@ def home():
 # ⚠️ TEMP ROUTE (REMOVE AFTER USE)
 @job_bp.route("/init-db", methods=["GET"])
 def init_db():
-    
     try:
         db.create_all()
         return jsonify({"message": "DB created"}), 200
@@ -25,7 +24,7 @@ def init_db():
         return jsonify({"error": str(e)}), 500
 
 
-# 🔍 GET JOBS (SAFE VERSION)
+# 🔍 GET JOBS (OPTIMIZED)
 @job_bp.route("/jobs", methods=["GET"])
 def get_jobs():
     try:
@@ -40,7 +39,8 @@ def get_jobs():
         if skill:
             query = query.join(Job.skills).filter(Skill.name.ilike(f"%{skill}%"))
 
-        jobs = query.all()
+        # ✅ LIMIT RESULTS (PREVENT HANGING)
+        jobs = query.limit(50).all()
 
         result = []
         for j in jobs:
@@ -63,7 +63,6 @@ def get_jobs():
 def create_job():
     try:
         data = request.get_json()
-        print("DEBUG DATA:", data)
 
         # 🔥 VALIDATION
         if not data:
@@ -79,8 +78,8 @@ def create_job():
             return jsonify({"error": "Company ID is required"}), 400
 
         # 🔥 GET CURRENT USER
-        user_id = int(get_jwt_identity())
-        user = User.query.get(user_id)
+        user_id = get_jwt_identity()   # no need int()
+        user = db.session.get(User, user_id)
 
         if not user:
             return jsonify({"error": "User not found"}), 404
@@ -91,7 +90,7 @@ def create_job():
 
         # 🔥 CHECK COMPANY EXISTS
         from app.models.company import Company
-        company = Company.query.get(data["company_id"])
+        company = db.session.get(Company, data["company_id"])
 
         if not company:
             return jsonify({"error": "Invalid company ID"}), 400
@@ -117,4 +116,5 @@ def create_job():
         }), 201
 
     except Exception as e:
+        db.session.rollback()   # 🔥 IMPORTANT (prevents DB lock)
         return jsonify({"error": str(e)}), 500
