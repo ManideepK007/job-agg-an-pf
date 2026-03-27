@@ -4,33 +4,66 @@ from app import db
 
 company_bp = Blueprint("companies", __name__)
 
-# GET all companies
+
+# 🔍 GET ALL COMPANIES
 @company_bp.route("/companies", methods=["GET"])
 def get_companies():
-    companies = Company.query.all()
+    try:
+        companies = Company.query.all()
 
-    result = []
-    for c in companies:
-        result.append({
-            "id": c.id,
-            "name": c.name,
-            "location": c.location
-        })
+        result = []
+        for c in companies:
+            result.append({
+                "id": c.id,
+                "name": c.name,
+                "location": c.location,
+                "website": getattr(c, "website", None),
+                "email": getattr(c, "email", None)
+            })
 
-    return jsonify(result)
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
-# CREATE company
+# ➕ CREATE COMPANY
 @company_bp.route("/companies", methods=["POST"])
 def create_company():
-    data = request.json
+    try:
+        data = request.get_json()
 
-    company = Company(
-        name=data["name"],
-        location=data["location"]
-    )
+        # 🔥 VALIDATION
+        if not data:
+            return jsonify({"error": "Request body required"}), 400
 
-    db.session.add(company)
-    db.session.commit()
+        if not data.get("name"):
+            return jsonify({"error": "Company name is required"}), 400
 
-    return jsonify({"message": "Company created"})
+        # 🔥 OPTIONAL DUPLICATE CHECK
+        existing = Company.query.filter_by(name=data["name"]).first()
+        if existing:
+            return jsonify({"error": "Company already exists"}), 400
+
+        # ✅ CREATE COMPANY
+        company = Company(
+            name=data["name"],
+            location=data.get("location"),
+            website=data.get("website"),
+            email=data.get("email")
+        )
+
+        db.session.add(company)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Company created",
+            "company": {
+                "id": company.id,
+                "name": company.name,
+                "location": company.location
+            }
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

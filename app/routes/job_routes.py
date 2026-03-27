@@ -17,6 +17,7 @@ def home():
 # ⚠️ TEMP ROUTE (REMOVE AFTER USE)
 @job_bp.route("/init-db", methods=["GET"])
 def init_db():
+    
     try:
         db.create_all()
         return jsonify({"message": "DB created"}), 200
@@ -62,6 +63,7 @@ def get_jobs():
 def create_job():
     try:
         data = request.get_json()
+        print("DEBUG DATA:", data)
 
         # 🔥 VALIDATION
         if not data:
