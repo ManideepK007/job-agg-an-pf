@@ -11,7 +11,7 @@ job_bp = Blueprint("jobs", __name__)
 def home():
     return "API is running"
 
-@job_bp.route("/init-db")
+@job_bp.route("/init-db", methods=["GET"])
 def init_db():
     from app import db
     db.create_all()
