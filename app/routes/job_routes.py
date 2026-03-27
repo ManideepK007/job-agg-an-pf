@@ -18,6 +18,11 @@ def home():
 @job_bp.route("/init-db", methods=["GET"])
 def init_db():
     try:
+        from app.models.company import Company
+        from app.models.job import Job
+        from app.models.skill import Skill
+        from app.models.user import User
+        from app.models.job_skill import job_skills
         db.create_all()
         return jsonify({"message": "DB created"}), 200
     except Exception as e:
