@@ -12,8 +12,7 @@ def create_app():
 
     # 🔥 DATABASE CONFIG (ENV FIRST, LOCAL FALLBACK)
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-        "DATABASE_URL",
-        "postgresql://postgres:YOUR_PASSWORD@localhost/jobdb"
+        "DATABASE_URL"
     )
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
