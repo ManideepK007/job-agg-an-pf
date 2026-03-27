@@ -9,7 +9,7 @@ job_bp = Blueprint("jobs", __name__)
 
 @job_bp.route("/", methods=["GET"])
 def home():
-    return "Server is running"
+    return "API is running"
 
 # 🔍 GET JOBS (PUBLIC)
 @job_bp.route("/jobs", methods=["GET"])
