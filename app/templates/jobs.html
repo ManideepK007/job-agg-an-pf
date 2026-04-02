@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahi Job Portal | Find Your Next Role</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --primary-dark: #0056b3;
+            --bg-gray: #f8f9fa;
+            --text-dark: #333;
+            --text-muted: #6c757d;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --success: #28a745;
+        }
+
+        body { 
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; 
+            background-color: var(--bg-gray); 
+            color: var(--text-dark); 
+            margin: 0;
+            padding-bottom: 50px;
+        }
+
+        .container { max-width: 850px; margin: auto; padding: 20px; }
+        
+        header {
+            background: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0; color: var(--primary); font-size: 2.2rem; font-weight: 800; }
+        .subtitle { color: var(--text-muted); margin-top: 5px; font-weight: 500; }
+
+        .search-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-top: -30px;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus { border-color: var(--primary); }
+
+        .btn-search {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-search:hover { background-color: var(--primary-dark); }
+
+        .results-count {
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .job-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .job-card:hover { 
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .job-main { flex: 1; }
+        .job-title { font-size: 1.3rem; margin: 0 0 8px 0; font-weight: 700; color: #1a1a1a; }
+        
+        .job-meta { 
+            display: flex;
+            gap: 20px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 18px;
+        }
+
+        .meta-item { display: flex; align-items: center; gap: 6px; }
+
+        .skill-badge {
+            background-color: #eef6ff;
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .btn-apply {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-apply:hover { background: var(--primary); color: white; }
+
+        .no-jobs { text-align: center; color: var(--text-muted); padding: 60px 20px; }
+        
+        .clear-filters-box {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .clear-link {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .clear-link:hover { color: var(--primary); text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Mahi Job Portal</h1>
+    <p class="subtitle">Connecting Top Talent with Premium Software Roles</p>
+</header>
+
+<div class="container">
+    <form action="{{ url_for('jobs.view_jobs_ui') }}" method="GET" class="search-container">
+        <input type="text" name="location" class="search-input" placeholder="Location (e.g. Hyderabad)" value="{{ request.args.get('location', '') }}">
+        <input type="text" name="skill" class="search-input" placeholder="Skill (e.g. Flask)" value="{{ request.args.get('skill', '') }}">
+        <button type="submit" class="btn-search">Find Jobs</button>
+    </form>
+
+    <div class="clear-filters-box">
+        {% if request.args.get('location') or request.args.get('skill') %}
+            <a href="{{ url_for('jobs.view_jobs_ui') }}" class="clear-link">✕ Clear all filters</a>
+        {% endif %}
+    </div>
+
+    {% if jobs %}
+        <div class="results-count">
+            Showing {{ jobs|length }} open positions
+        </div>
+
+        {% for job in jobs %}
+        <div class="job-card">
+            <div class="job-main">
+                <h3 class="job-title">{{ job.title }}</h3>
+                <div class="job-meta">
+                    <span class="meta-item">📍 {{ job.location or 'Remote' }}</span>
+                    {% if job.salary %}
+                    <span class="meta-item">💰 {{ job.salary }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="skill-container">
+                    {% if job.skills %}
+                        {% for skill in job.skills %}
+                            <span class="skill-badge">{{ skill.name if skill.name is defined else skill }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span style="color: #bbb; font-size: 0.85rem; font-style: italic;">General Requirement</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="job-action">
+                <a href="#" class="btn-apply">Details</a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-jobs">
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" alt="Not found" style="opacity: 0.3; margin-bottom: 20px;">
+            <h3>No matches found</h3>
+            <p>Try searching for broader terms like "India" or "Python".</p>
+            <a href="{{ url_for('jobs.view_jobs_ui') }}" style="color: var(--primary); text-decoration: none; font-weight: bold;">View all jobs</a>
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
