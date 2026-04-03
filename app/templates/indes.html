@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} | Modern Job Ecosystem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1a1a1a; }
+        .hero { padding: 120px 0 80px; background: radial-gradient(circle at top right, #f8f9ff, #ffffff); }
+        .btn-black { background: #000; color: #fff; border-radius: 8px; padding: 12px 28px; font-weight: 600; transition: 0.3s; }
+        .btn-black:hover { background: #333; color: #fff; transform: translateY(-2px); }
+        .card-feat { border: 1px solid #f0f0f0; border-radius: 16px; padding: 30px; transition: 0.3s; height: 100%; }
+        .card-feat:hover { border-color: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .badge-match { background: #e6fcf5; color: #0ca678; border-radius: 6px; padding: 5px 12px; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand fw-extrabold fs-3" href="/">{{ app_name }}</a>
+            <div class="ms-auto d-flex align-items-center">
+                <a class="nav-link px-3" href="/jobs">Browse Jobs</a>
+                <a class="btn btn-black ms-3" href="/auth/login">Join Now</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container text-center">
+            <span class="badge badge-match mb-3">Live in Hyderabad & Remote</span>
+            <h1 class="display-3 fw-bolder mb-4">Engineering your next <br><span style="text-decoration: underline;">Career Move.</span></h1>
+            <p class="lead text-muted mx-auto mb-5" style="max-width: 600px;">
+                The only job aggregator that uses **Smart Match** logic to rank opportunities based on your specific technical stack.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/jobs" class="btn btn-black btn-lg">Explore Dashboard</a>
+                <a href="/api/status" class="btn btn-outline-secondary btn-lg">View API Status</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="py-5 container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card-feat">
+                    <h4 class="fw-bold">01. Smart Match</h4>
+                    <p class="text-muted">Algorithm-driven ranking that compares your SkillSync profile with real-time job requirements.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-feat">
+                    <h4 class="fw-bold">02. Skill Gap Analysis</h4>
+                    <p class="text-muted">Don't just get rejected. We tell you exactly which libraries or tools you're missing for specific roles.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-feat">
+                    <h4 class="fw-bold">03. Developer-First</h4>
+                    <p class="text-muted">Built by developers, for developers. Clean JSON outputs and a minimalist UI for distraction-free searching.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>
