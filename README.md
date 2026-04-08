@@ -1,18 +1,20 @@
-# 🚀 Mahi Job Portal (SkillSync)
+---
+
+# 🚀 SkillSync (Mahi Job Portal)
 **A high-performance Job Aggregator Ecosystem built for the modern tech market.**
 
-The Mahi Job Portal is a backend-centric web application designed to bridge the gap between job seekers and employers. Built with a focus on **relational data integrity** and **clean system architecture**, the platform specializes in aggregating technical opportunities and matching them with candidate skill sets.
+SkillSync is a backend-centric web application designed to bridge the gap between job seekers and employers. Built with a focus on **relational data integrity** and **clean system architecture**, the platform specializes in aggregating technical opportunities and matching them with candidate skill sets using a robust Many-to-Many mapping system.
 
 ---
 
 ## 🏗️ System Architecture
-The project follows the **Application Factory Pattern** using Flask, ensuring the codebase remains modular, scalable, and easy to maintain.
+The project leverages the **Application Factory Pattern** via Flask, promoting a decoupled architecture where configurations, routes, and extensions are isolated.
 
 * **Backend:** Python 3.14 + Flask (Modular Blueprints)
-* **Database:** PostgreSQL (Relational mapping via SQLAlchemy)
-* **Authentication:** Session-based with Flask-Login & Security via JWT
-* **Frontend:** Minimalist Jinja2 Templates + Vanilla CSS (No-decoration philosophy)
-* **Environment:** Decoupled configuration using `.env` for security
+* **Database:** PostgreSQL (Relational mapping via SQLAlchemy ORM)
+* **Logic Layer:** Implements complex SQL joins to facilitate skill-to-job matching.
+* **Authentication:** Hybrid approach using **Flask-Login** for session persistence and **JWT** for secure API interactions.
+* **Frontend:** "No-decoration" philosophy using **Jinja2 Templates** and **Vanilla CSS**, ensuring sub-100ms render times.
 
 
 
@@ -20,34 +22,77 @@ The project follows the **Application Factory Pattern** using Flask, ensuring th
 
 ## 🛠️ Core Features
 
-### 1. Advanced Search & Filtering
-* **Multi-Parametric Querying:** Filter jobs by Keyword, City (Hyderabad, Bangalore, Remote), and Company.
-* **Skill-Based Matching:** A Many-to-Many relationship model allowing users to find jobs based on specific technical stacks (e.g., Python, React, Next.js).
-* **Optimized Performance:** Implements SQL `GROUP BY` logic to handle complex joins without triggering JSON equality errors.
+### 1. Skill-Centric Discovery
+Unlike traditional boards, SkillSync uses a **Many-to-Many (M2M)** relationship model.
+* **Dynamic Tagging:** Jobs are tagged with specific technical stacks (e.g., Python, React).
+* **Relational Filtering:** Uses optimized SQL `JOIN` and `GROUP BY` logic to filter jobs by multiple skill IDs simultaneously without performance degradation.
 
-### 2. User & Role Management
-* **Secure Authentication:** Protected routes for job posting and application tracking.
-* **Role-Based Access (RBAC):** Distinct logic paths for "Job Seekers" and "Employers/Companies."
+### 2. Multi-Parametric Search
+* **Contextual Queries:** Integrated search across Keywords, Locations (Hyderabad, Bangalore, Remote), and Company profiles.
+* **Constraint-Based Logic:** Database-level constraints prevent duplicate applications and ensure data consistency.
 
-### 3. "Quick Apply" Engine
-* **Frictionless UX:** Single-click application logic that records intent and prevents duplicate entries through database-level constraints.
+### 3. Role-Based Access Control (RBAC)
+* **Job Seekers:** Profile management, application tracking, and skill-matching dashboard.
+* **Employers:** Job lifecycle management (Create, Update, Delete) and applicant review interface.
 
-### 4. Minimalist UI/UX
-* **Typography-First Design:** Leveraging clean fonts and generous whitespace to prioritize readability.
-* **Responsive Feed:** A mobile-friendly job board that adapts to any screen size.
+### 4. Minimalist "Typography-First" UI
+* High-contrast, mobile-responsive design.
+* Focus on **Readability over Ornamentation**, reducing cognitive load for users scanning high volumes of data.
+
+---
+
+## 📊 Database Schema
+The heart of SkillSync lies in its relational structure, designed for referential integrity:
+
+| Entity | Description | Key Relationships |
+| :--- | :--- | :--- |
+| **Users** | Core account data & Roles | 1:M with Applications |
+| **Jobs** | Job metadata & requirements | M:M with Skills, 1:M with Applications |
+| **Skills** | Technical stack definitions | M:M with Jobs |
+| **Applications** | The "Join" entity for tracking | Links Users to Jobs |
 
 ---
 
 ## 📂 Project Structure
 ```text
-D:\SoW\job-agg-an-pf\
+job-agg-an-pf/
 ├── app/
-│   ├── models/          # SQLAlchemy Database Models (User, Job, Skill)
-│   ├── routes/          # Blueprint-based Route Handlers (job_routes.py, etc.)
-│   ├── static/          # Professional Minimalist CSS & Assets
-│   ├── templates/       # Jinja2 HTML Templates (explore.html, etc.)
-│   ├── extensions.py    # Database & Login Manager Initialization
-│   └── __init__.py      # The App Factory (create_app)
-├── .env                 # Environment Secrets (DB_URL, SECRET_KEY)
-├── run.py               # Application Entry Point
-└── requirements.txt     # Dependency Manifest
+│   ├── models/          # SQLAlchemy Models (User, Job, Skill, Association Tables)
+│   ├── routes/          # Blueprints (auth_routes.py, job_routes.py, main_routes.py)
+│   ├── static/          # Modular CSS (layout.css, components.css)
+│   ├── templates/       # Jinja2 (base.html, job_detail.html, search.html)
+│   ├── extensions.py    # Global init for SQLAlchemy, Migrate, and LoginManager
+│   └── __init__.py      # App Factory (create_app)
+├── .env                 # Environment Secrets (DATABASE_URL, SECRET_KEY)
+├── run.py               # Entry point
+└── requirements.txt     # Python 3.14+ Dependencies
+```
+
+---
+
+## 🚀 Getting Started
+
+1.  **Clone & Environment:**
+    ```bash
+    git clone https://github.com/ManideepK007/job-agg-an-pf.git
+    cd job-agg-an-pf
+    python -m venv venv
+    source venv/bin/activate  # venv\Scripts\activate on Windows
+    ```
+
+2.  **Dependencies & Database:**
+    ```bash
+    pip install -r requirements.txt
+    # Ensure PostgreSQL is running and update .env
+    flask db upgrade
+    ```
+
+3.  **Execution:**
+    ```bash
+    python run.py
+    ```
+
+---
+
+### 💡 Pro-Tip for your README
+Since you mentioned using **Python 3.14**, make sure your `requirements.txt` specifically includes `psycopg2-binary` for PostgreSQL support and `python-dotenv` to handle that `.env` file you've smartly included in your structure! 
