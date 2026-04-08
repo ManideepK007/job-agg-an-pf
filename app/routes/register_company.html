@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Register Company - SkillSync{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4" style="font-family: 'EB Garamond', serif;">Register Your Company</h2>
+                    <p class="text-muted text-center small mb-4">Create a profile to start posting job opportunities.</p>
+                    
+                    <form method="POST" action="{{ url_for('company_bp.register_company') }}">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Company Name</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Tech Solutions Inc" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="website" class="form-label">Website URL</label>
+                            <input type="url" class="form-control" id="website" name="website" placeholder="https://example.com">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Headquarters Location</label>
+                            <input type="text" class="form-control" id="location" name="location" placeholder="e.g. Hyderabad, India" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Company Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" placeholder="Briefly describe what your company does..."></textarea>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-dark btn-lg" style="border-radius: 4px;">Register Company</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a href="{{ url_for('job_bp.explore') }}" class="text-decoration-none text-muted small">← Back to Jobs</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

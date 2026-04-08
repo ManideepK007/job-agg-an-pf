@@ -3,219 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mahi Job Portal | Find Your Next Role</title>
+    <title>Mahi Job Portal | Precision Career Matching</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #007bff;
-            --primary-dark: #0056b3;
-            --bg-gray: #f8f9fa;
-            --text-dark: #333;
-            --text-muted: #6c757d;
-            --shadow: 0 4px 12px rgba(0,0,0,0.08);
-            --success: #28a745;
+            --primary: #2563eb;
+            --primary-soft: #eff6ff;
+            --secondary: #64748b;
+            --text-main: #1e293b;
+            --border: #e2e8f0;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         body { 
-            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; 
-            background-color: var(--bg-gray); 
-            color: var(--text-dark); 
-            margin: 0;
-            padding-bottom: 50px;
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            margin: 0; 
+            line-height: 1.6;
         }
 
-        .container { max-width: 850px; margin: auto; padding: 20px; }
-        
-        header {
-            background: white;
-            padding: 40px 20px;
-            text-align: center;
-            border-bottom: 1px solid #eee;
-            margin-bottom: 30px;
-        }
-
-        h1 { margin: 0; color: var(--primary); font-size: 2.2rem; font-weight: 800; }
-        .subtitle { color: var(--text-muted); margin-top: 5px; font-weight: 500; }
-
-        .search-container {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            margin-top: -30px;
-            margin-bottom: 10px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .search-input:focus { border-color: var(--primary); }
-
-        .btn-search {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-search:hover { background-color: var(--primary-dark); }
-
-        .results-count {
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .job-card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        /* --- Navigation --- */
+        nav {
+            background: var(--white);
+            padding: 0.8rem 6%;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0; z-index: 1000;
         }
-        
-        .job-card:hover { 
-            border-color: var(--primary);
-            box-shadow: var(--shadow);
-            transform: translateY(-2px);
-        }
+        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); letter-spacing: -1px; text-decoration: none; }
 
-        .job-main { flex: 1; }
-        .job-title { font-size: 1.3rem; margin: 0 0 8px 0; font-weight: 700; color: #1a1a1a; }
+        /* --- Hero Search Section --- */
+        .search-hero {
+            background: var(--white);
+            padding: 40px 20px 80px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .search-hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 10px; }
         
-        .job-meta { 
+        .search-box-wrapper {
+            max-width: 950px;
+            margin: -35px auto 0 auto;
+            background: var(--white);
+            padding: 8px;
+            border-radius: 50px;
             display: flex;
-            gap: 20px;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
         }
-
-        .meta-item { display: flex; align-items: center; gap: 6px; }
-
-        .skill-badge {
-            background-color: #eef6ff;
-            color: var(--primary);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-right: 8px;
-            margin-bottom: 8px;
-            display: inline-block;
-            text-transform: uppercase;
-        }
-
-        .btn-apply {
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 10px 22px;
-            border-radius: 8px;
-            font-weight: bold;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .btn-apply:hover { background: var(--primary); color: white; }
-
-        .no-jobs { text-align: center; color: var(--text-muted); padding: 60px 20px; }
+        .search-group { flex: 1; display: flex; align-items: center; padding: 0 20px; border-right: 1px solid var(--border); }
+        .search-group:last-child { border-right: none; }
+        .search-group input { border: none; outline: none; width: 100%; padding: 15px 5px; font-size: 1rem; }
         
-        .clear-filters-box {
-            text-align: right;
+        .btn-search {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 35px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-search:hover { background: #1d4ed8; }
+
+        /* --- Main Layout --- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* --- Sidebar Filters --- */
+        .sidebar { position: sticky; top: 100px; height: fit-content; }
+        .filter-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .filter-title { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--secondary); margin-bottom: 15px; display: block; }
+        .filter-item { display: block; margin-bottom: 10px; font-size: 0.9rem; cursor: pointer; color: #444; text-decoration: none; }
+        .filter-item:hover { color: var(--primary); }
+
+        /* --- Job Cards --- */
+        .job-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: 0.3s;
+            position: relative;
+        }
+        .job-card:hover { border-color: var(--primary); box-shadow: var(--shadow); }
+
+        .match-badge {
+            position: absolute;
+            top: 25px; right: 25px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+
+        .job-header { display: flex; gap: 15px; margin-bottom: 15px; }
+        .company-icon { width: 45px; height: 45px; background: #f1f5f9; border-radius: 8px; display: grid; place-items: center; font-weight: 800; color: var(--secondary); }
+        
+        .job-title { font-size: 1.2rem; font-weight: 700; margin: 0; color: #0f172a; }
+        .company-link { color: var(--primary); text-decoration: none; font-size: 0.95rem; font-weight: 600; }
+        .company-link:hover { text-decoration: underline; }
+
+        .job-meta { display: flex; gap: 20px; margin: 15px 0; font-size: 0.85rem; color: var(--secondary); }
+        .meta-link { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 5px; }
+        .meta-link:hover { color: var(--primary); }
+
+        .job-desc {
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 20px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Skill Specializations */
+        .skills-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .skill-hyperlink {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .skill-hyperlink:hover { background: var(--primary); color: white; }
+
+        .gap-nudge {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 0.8rem;
             margin-bottom: 20px;
         }
 
-        .clear-link {
-            color: var(--text-muted);
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 15px;
+        }
+        .btn-details { text-decoration: none; color: var(--secondary); font-weight: 700; font-size: 0.85rem; }
+        .btn-apply { 
+            background: var(--primary); 
+            color: white; 
+            padding: 10px 25px; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            font-weight: 700; 
             font-size: 0.85rem;
-            text-decoration: none;
-            font-weight: 600;
+            border: none;
+            cursor: pointer;
         }
 
-        .clear-link:hover { color: var(--primary); text-decoration: underline; }
+        @media (max-width: 850px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .search-box-wrapper { border-radius: var(--radius); flex-direction: column; }
+            .search-group { border-right: none; border-bottom: 1px solid var(--border); }
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Job Aggregator and Platform</h1>
-    <p class="subtitle">Connecting Top Talent with Premium Software Roles</p>
-</header>
-
-<div class="container">
-    <form action="{{ url_for('jobs.view_jobs_ui') }}" method="GET" class="search-container">
-        <input type="text" name="location" class="search-input" placeholder="Location (e.g. Hyderabad)" value="{{ request.args.get('location', '') }}">
-        <input type="text" name="skill" class="search-input" placeholder="Skill (e.g. Flask)" value="{{ request.args.get('skill', '') }}">
-        <button type="submit" class="btn-search">Find Jobs</button>
-    </form>
-
-    <div class="clear-filters-box">
-        {% if request.args.get('location') or request.args.get('skill') %}
-            <a href="{{ url_for('jobs.view_jobs_ui') }}" class="clear-link">✕ Clear all filters</a>
-        {% endif %}
+<nav>
+    <a href="/" class="logo">MAHI JOBS</a>
+    <div style="display: flex; gap: 20px; align-items: center;">
+        <a href="#" style="text-decoration: none; color: var(--secondary); font-size: 0.9rem; font-weight: 600;">For Employers</a>
+        <a href="#" class="btn-apply" style="background: #f1f5f9; color: var(--primary);">Login</a>
     </div>
+</nav>
 
-    {% if jobs %}
-        <div class="results-count">
-            Showing {{ jobs|length }} open positions
+<div class="search-hero">
+    <h1>Find the role you're built for.</h1>
+    <p style="color: var(--secondary);">Structured matching for the Hyderabad tech ecosystem.</p>
+</div>
+
+<form action="{{ url_for('jobs.view_jobs_ui') }}" method="GET" class="search-box-wrapper">
+    <div class="search-group">
+        <input type="text" name="skill" placeholder="Skills (e.g. Python, Flask, Node)" value="{{ request.args.get('skill', '') }}">
+    </div>
+    <div class="search-group">
+        <input type="text" name="location" placeholder="Location (e.g. Gachibowli)" value="{{ request.args.get('location', '') }}">
+    </div>
+    <button type="submit" class="btn-search">Search Jobs</button>
+</form>
+
+<div class="content-grid">
+    <aside class="sidebar">
+        <div class="filter-card">
+            <span class="filter-title">Specialization</span>
+            <a href="{{ url_for('jobs.view_jobs_ui', skill='Backend') }}" class="filter-item">Backend Developer</a>
+            <a href="{{ url_for('jobs.view_jobs_ui', skill='Data') }}" class="filter-item">Data Analyst</a>
+            <a href="{{ url_for('jobs.view_jobs_ui', skill='Full Stack') }}" class="filter-item">Full Stack</a>
         </div>
+        <div class="filter-card">
+            <span class="filter-title">Work Mode</span>
+            <label class="filter-item"><input type="checkbox"> Remote</label>
+            <label class="filter-item"><input type="checkbox"> On-site (Hyd)</label>
+        </div>
+    </aside>
 
-        {% for job in jobs %}
-        <div class="job-card">
-            <div class="job-main">
-                <h3 class="job-title">{{ job.title }}</h3>
+    <main>
+        {% if jobs %}
+            <div style="margin-bottom: 20px; font-weight: 700; color: var(--secondary); font-size: 0.9rem;">
+                Showing {{ jobs|length }} specialized opportunities
+            </div>
+
+            {% for job in jobs %}
+            <div class="job-card">
+                {% if job.match_score %}
+                    <div class="match-badge">{{ job.match_score }}% Match</div>
+                {% endif %}
+
+                <div class="job-header">
+                    <div class="company-icon">{{ (job.company_name or 'J')[0] }}</div>
+                    <div>
+                        <h2 class="job-title">{{ job.title }}</h2>
+                        <a href="{{ url_for('jobs.view_jobs_ui', company=job.company_name) }}" class="company-link">
+                            {{ job.company_name or 'Mahi Partner Firm' }}
+                        </a>
+                    </div>
+                </div>
+
                 <div class="job-meta">
-                    <span class="meta-item">📍 {{ job.location or 'Remote' }}</span>
-                    {% if job.salary %}
-                    <span class="meta-item">💰 {{ job.salary }}</span>
-                    {% endif %}
+                    <span title="Experience">💼 0-2 Yrs</span>
+                    <span title="Salary">💰 {{ job.salary or 'Competitive' }}</span>
+                    <a href="{{ url_for('jobs.view_jobs_ui', location=job.location) }}" class="meta-link">
+                        📍 {{ job.location or 'Hyderabad' }}
+                    </a>
                 </div>
-                
-                <div class="skill-container">
-                    {% if job.skills %}
-                        {% for skill in job.skills %}
-                            <span class="skill-badge">{{ skill.name if skill.name is defined else skill }}</span>
-                        {% endfor %}
-                    {% else %}
-                        <span style="color: #bbb; font-size: 0.85rem; font-style: italic;">General Requirement</span>
-                    {% endif %}
+
+                <div class="job-desc">
+                    {{ job.description or 'Seeking a detail-oriented ' + job.title + ' to optimize backend infrastructure and implement specialized logic.' }}
+                </div>
+
+                <div class="skills-row">
+                    {% for skill in job.skills[:5] %}
+                        <a href="{{ url_for('jobs.view_jobs_ui', skill=skill) }}" class="skill-hyperlink">
+                            {{ skill }}
+                        </a>
+                    {% endfor %}
+                </div>
+
+                {% if job.missing_skills %}
+                <div class="gap-nudge">
+                    <strong>🎯 Bridge the Gap:</strong> You are missing <b>{{ job.missing_skills[0] }}</b>. 
+                    <a href="#" style="color: var(--primary); text-decoration: underline;">Learn it to boost your match score.</a>
+                </div>
+                {% endif %}
+
+                <div class="card-footer">
+                    <a href="#" class="btn-details">Full Specifications</a>
+                    <form action="#" method="POST" style="margin:0;">
+                        <button type="submit" class="btn-apply">Submit Application</button>
+                    </form>
                 </div>
             </div>
-            
-            <div class="job-action">
-                <a href="#" class="btn-apply">Details</a>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 60px; background: white; border-radius: 12px;">
+                <h3>No exact data matches found.</h3>
+                <p>Try clearing your filters or searching for "Python" or "Hyderabad".</p>
+                <a href="{{ url_for('jobs.view_jobs_ui') }}" style="color: var(--primary); font-weight: 700;">Reset All Filters</a>
             </div>
-        </div>
-        {% endfor %}
-    {% else %}
-        <div class="no-jobs">
-            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" alt="Not found" style="opacity: 0.3; margin-bottom: 20px;">
-            <h3>No matches found</h3>
-            <p>Try searching for broader terms like "India" or "Python".</p>
-            <a href="{{ url_for('jobs.view_jobs_ui') }}" style="color: var(--primary); text-decoration: none; font-weight: bold;">View all jobs</a>
-        </div>
-    {% endif %}
+        {% endif %}
+    </main>
 </div>
 
 </body>

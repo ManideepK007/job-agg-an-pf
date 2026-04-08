@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Post a New Job</h2>
+    <form method="POST" action="{{ url_for('job_bp.post_job') }}">
+        <div class="mb-3">
+            <label>Job Title</label>
+            <input type="text" name="title" class="form-control" required placeholder="e.g. Backend Developer">
+        </div>
+        <div class="mb-3">
+            <label>Company Name</label>
+            <input type="text" name="company_name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Location</label>
+            <input type="text" name="location" class="form-control" required placeholder="Hyderabad or Remote">
+        </div>
+        <div class="mb-3">
+            <label>Salary Range</label>
+            <input type="text" name="salary" class="form-control" placeholder="e.g. 5-8 LPA">
+        </div>
+        <div class="mb-3">
+            <label>Required Skills (Comma separated)</label>
+            <input type="text" name="skills_required" class="form-control" placeholder="Python, Flask, SQL">
+        </div>
+        <div class="mb-3">
+            <label>Description</label>
+            <textarea name="description" class="form-control" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Publish Job</button>
+    </form>
+</div>
+{% endblock %}

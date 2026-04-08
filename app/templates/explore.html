@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Jobs | SkillSync</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Modern Minimalist Overrides */
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; color: #333; margin: 0; }
+        .container { display: grid; grid-template-columns: 280px 1fr; max-width: 1200px; margin: 40px auto; gap: 30px; padding: 0 20px; }
+        
+        /* Sidebar: Clean & Sticky */
+        .sidebar { 
+            background: white; padding: 24px; border-radius: 12px; height: fit-content; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); position: sticky; top: 20px; border: 1px solid #eee;
+        }
+        .sidebar h3 { font-size: 1.1rem; margin-bottom: 20px; color: #111; border-bottom: 2px solid #007bff; display: inline-block; }
+        .filter-group { margin-bottom: 20px; }
+        .filter-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.85rem; color: #666; }
+        .filter-input { width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 0.9rem; transition: border-color 0.2s; }
+        .filter-input:focus { outline: none; border-color: #007bff; }
+
+        /* Job Cards: Premium Spacing */
+        .job-feed h2 { font-size: 1.5rem; margin-bottom: 25px; color: #111; }
+        .job-card { 
+            background: white; padding: 24px; margin-bottom: 20px; border-radius: 12px; 
+            border: 1px solid #eee; transition: all 0.3s ease; position: relative;
+        }
+        .job-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: #007bff; }
+        .job-card h3 { margin: 0 0 8px 0; font-size: 1.3rem; }
+        .job-card h3 a { color: #007bff; text-decoration: none; }
+        .job-card .company-link { color: #555; text-decoration: none; font-weight: 600; font-size: 1rem; }
+        .job-card .meta { display: flex; gap: 15px; color: #777; font-size: 0.9rem; margin: 12px 0; }
+        
+        /* Skill Tags */
+        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+        .tag { 
+            background: #f0f7ff; color: #007bff; padding: 5px 12px; 
+            border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-decoration: none; border: 1px solid #d0e5ff;
+        }
+        .tag:hover { background: #007bff; color: white; }
+
+        /* Clean Buttons */
+        .btn-apply { 
+            background: #007bff; color: white; border: none; padding: 10px 22px; 
+            border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: background 0.2s;
+        }
+        .btn-apply:hover { background: #0056b3; }
+        .btn-submit { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        /* Flash Messages */
+        .flash { padding: 15px; margin: 20px auto; max-width: 1160px; border-radius: 8px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header style="background: white; padding: 15px 50px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="margin: 0; color: #007bff; font-size: 1.5rem; letter-spacing: -0.5px;">SkillSync</h1>
+        <nav style="display: flex; gap: 30px; align-items: center;">
+            <a href="/" style="text-decoration: none; color: #444; font-weight: 500;">Home</a>
+            <a href="{{ url_for('job_bp.explore') }}" style="color: #007bff; font-weight: 700; text-decoration: none;">Jobs</a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('auth_bp.logout') }}" style="color: #dc3545; text-decoration: none; font-size: 0.9rem;">Logout</a>
+            {% else %}
+                <a href="{{ url_for('auth_bp.login') }}" style="background: #007bff; color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-weight: 600;">Login</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Refine Search</h3>
+            <form action="{{ url_for('job_bp.explore') }}" method="GET">
+                <div class="filter-group">
+                    <label>Keywords</label>
+                    <input type="text" name="q" placeholder="Software, Engineer..." class="filter-input" value="{{ request.args.get('q', '') }}">
+                </div>
+
+                <div class="filter-group">
+                    <label>Skills</label>
+                    <input type="text" name="skill" placeholder="Python, React..." class="filter-input" value="{{ request.args.get('skill', '') }}">
+                </div>
+
+                <div class="filter-group">
+                    <label>Location</label>
+                    <select name="city" class="filter-input">
+                        <option value="">All India</option>
+                        <option value="Hyderabad" {{ 'selected' if request.args.get('city') == 'Hyderabad' }}>Hyderabad</option>
+                        <option value="Bangalore" {{ 'selected' if request.args.get('city') == 'Bangalore' }}>Bangalore</option>
+                        <option value="Remote" {{ 'selected' if request.args.get('city') == 'Remote' }}>Remote</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-submit">Apply Filters</button>
+                <a href="{{ url_for('job_bp.explore') }}" style="display: block; text-align: center; margin-top: 15px; color: #999; font-size: 0.8rem; text-decoration: none;">Reset All</a>
+            </form>
+        </aside>
+
+        <main class="job-feed">
+            <h2>
+                {% if request.args.get('q') or request.args.get('skill') or request.args.get('city') %}
+                    Found {{ pagination.total }} matching jobs
+                {% else %}
+                    Latest Opportunities ({{ pagination.total }})
+                {% endif %}
+            </h2>
+
+            {% for job in jobs %}
+            <div class="job-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h3><a href="{{ url_for('job_bp.job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
+                        <a href="{{ url_for('job_bp.explore', company=job.company_name) }}" class="company-link">{{ job.company_name }}</a>
+                    </div>
+                    <form action="{{ url_for('job_bp.quick_apply', job_id=job.id) }}" method="POST">
+                        <button type="submit" class="btn-apply">Quick Apply</button>
+                    </form>
+                </div>
+
+                <div class="meta">
+                    <span>📍 {{ job.location or 'Remote' }}</span>
+                    <span>💰 {{ job.salary or 'Negotiable' }}</span>
+                    <span style="color: #bbb;">🕒 {{ job.posted_at.strftime('%d %b') if job.posted_at else 'Today' }}</span>
+                </div>
+                
+                <div class="tags-container">
+                    {% for skill in job.skills %}
+                        <a href="{{ url_for('job_bp.explore', skill=skill.name) }}" class="tag">{{ skill.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 60px; background: white; border-radius: 12px; border: 1px dashed #ccc;">
+                <h3 style="color: #888;">No matches found.</h3>
+                <p style="color: #aaa;">Try removing filters or searching for broader terms.</p>
+            </div>
+            {% endfor %}
+
+            {% if pagination.pages > 1 %}
+            <div style="margin-top: 30px; display: flex; gap: 8px; justify-content: center;">
+                {% for page_num in pagination.iter_pages() %}
+                    {% if page_num %}
+                        <a href="{{ url_for('job_bp.explore', page=page_num, q=request.args.get('q', ''), city=request.args.get('city', ''), skill=request.args.get('skill', '')) }}" 
+                           style="padding: 8px 16px; border: 1px solid #ddd; border-radius: 6px; text-decoration: none; {{ 'background: #007bff; color: white; border-color: #007bff;' if page_num == pagination.page else 'color: #555; background: white;' }}">
+                            {{ page_num }}
+                        </a>
+                    {% else %}
+                        <span style="padding: 8px;">...</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </main>
+    </div>
+
+</body>
+</html>

@@ -1,26 +1,22 @@
-from app import db
+from app.extensions import db
+from flask_login import UserMixin
 
-# ✅ ADVANCED: Association table for User-Skill relationship
+# 1. THE ASSOCIATION TABLE (The Bridge)
+# Ensure these strings 'user.id' and 'skill.id' match your __tablename__
 user_skills = db.Table('user_skills',
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True),
-    db.Column('skill_id', db.Integer, db.ForeignKey('skills.id', ondelete="CASCADE"), primary_key=True)
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('skill_id', db.Integer, db.ForeignKey('skill.id'), primary_key=True)
 )
 
-class User(db.Model):
-    __tablename__ = "users"
+class User(UserMixin, db.Model):
+    __tablename__ = 'user'  # <--- MUST MATCH THE FOREIGN KEY ABOVE
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), default="user")
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), default="seeker")
 
-    # ✅ ADVANCED: Relationship to fetch user's skills
+    # 2. THE RELATIONSHIP
+    # This links the Skill model through the user_skills table
     skills = db.relationship('Skill', secondary=user_skills, backref=db.backref('users', lazy='dynamic'))
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "username": self.username,
-            "role": self.role,
-            "skills": [skill.name for skill in self.skills]
-        }

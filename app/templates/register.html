@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Join Mahi Jobs</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .auth-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px; }
+        h2 { margin-bottom: 24px; color: #1e293b; font-weight: 800; text-align: center; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
+        .btn-submit { background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 700; width: 100%; cursor: pointer; }
+        .role-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .role-option { flex: 1; text-align: center; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <h2>Create Account</h2>
+        <form method="POST" action="/register">
+            <input type="email" name="email" placeholder="Email Address" required>
+            <input type="password" name="password" placeholder="Password" required>
+            
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">I am a:</p>
+            <select name="role">
+                <option value="seeker">Job Seeker</option>
+                <option value="recruiter">Employer / Recruiter</option>
+            </select>
+            
+            <button type="submit" class="btn-submit">Sign Up</button>
+        </form>
+        <p style="text-align: center; font-size: 0.9rem; margin-top: 20px;">
+            Already have an account? <a href="/login" style="color: #2563eb; text-decoration: none;">Login</a>
+        </p>
+    </div>
+</body>
+</html>

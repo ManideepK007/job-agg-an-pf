@@ -1,142 +1,143 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from flask_login import login_required, current_user
 from app.models.job import Job
-from app.models.skill import Skill
-from app.models.user import User
-from app import db
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.models.application import Application
+from app.models.skill import Skill 
+from app.extensions import db
 
-job_bp = Blueprint("jobs", __name__)
+job_bp = Blueprint('job_bp', __name__)
 
-# ==============================
-# 🧠 ADVANCED: MATCHING ALGORITHM
-# ==============================
+@job_bp.route('/')
+@job_bp.route('/jobs')
+def explore():
+    page = request.args.get('page', 1, type=int)
+    search_query = request.args.get('q', '').strip()
+    city_filter = request.args.get('city', '').strip()
+    skill_filter = request.args.get('skill', '').strip() 
+    company_filter = request.args.get('company', '').strip()
+    # 1. Base Query
+    query = db.session.query(Job)
 
-def calculate_match_score(user_skills, job_skills):
-    """
-    Calculates the percentage match between user and job skills.
-    Uses Set Intersection (O(n) complexity).
-    """
-    if not job_skills:
-        return 0
+    # 2. Text Search (Title/Description)
+    if search_query:
+        query = query.filter(
+            (Job.title.ilike(f'%{search_query}%')) | 
+            (Job.description.ilike(f'%{search_query}%'))
+        )
     
-    # Extract IDs to compare sets
-    user_skill_ids = {s.id for s in user_skills}
-    job_skill_ids = {s.id for s in job_skills}
+    # 3. Location Filter
+    if city_filter:
+        query = query.filter(Job.location.ilike(f'%{city_filter}%'))
+
+    if company_filter:
+        query = query.filter(Job.company_name.ilike(f'%{company_filter}%'))
     
-    # Logic: How many required skills does the user actually have?
-    matched_skills = user_skill_ids.intersection(job_skill_ids)
+    # 4. SKILL FILTER (Join many-to-many relationship)
+    if skill_filter:
+        query = query.join(Job.skills).filter(Skill.name.ilike(f'%{skill_filter}%'))
+
+    # 5. FINAL PAGINATION (The Fix)
+    # We use .group_by(Job.id) to prevent duplicates from the join.
+    # We REMOVE .distinct() because PostgreSQL cannot compare JSON columns.
+    pagination = (
+        query.group_by(Job.id)
+        .order_by(Job.posted_at.desc())
+        .paginate(page=page, per_page=10)
+    )
     
-    score = (len(matched_skills) / len(job_skill_ids)) * 100
-    return round(score, 1)
+    return render_template(
+        'explore.html', 
+        jobs=pagination.items, 
+        pagination=pagination,
+        search_query=search_query,
+        skill_filter=skill_filter,
+        company_filter=company_filter # Added company filter to template context
+    )
 
-# ==============================
-# 🔍 SEARCH & RECOMMENDATION ROUTES
-# ==============================
+@job_bp.route('/job/<int:job_id>')
+def job_detail(job_id):
+    job = db.session.get(Job, job_id)
+    if not job:
+        return render_template('404.html'), 404
 
-@job_bp.route("/api/jobs/recommendations", methods=["GET"])
-@jwt_required()
-def get_recommendations():
-    """
-    ADVANCED FEATURE: Returns jobs sorted by how well they match 
-    the logged-in user's profile.
-    """
-    user_id = get_jwt_identity()
-    user = db.session.get(User, user_id)
-    
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    all_jobs = Job.query.all()
-    recommendations = []
-
-    for job in all_jobs:
-        score = calculate_match_score(user.skills, job.skills)
+    has_applied = False
+    if current_user.is_authenticated:
+        # Optimization: use exists() for a faster check than .first()
+        has_applied = db.session.query(
+            db.exists().where(Application.job_id == job.id, Application.user_id == current_user.id)
+        ).scalar()
         
-        # We only suggest jobs that have at least a 10% match
-        if score > 10:
-            job_data = job.to_dict()
-            job_data['match_score'] = f"{score}%"
-            # Insight: Tell the user exactly what skills they are missing
-            job_data['missing_skills'] = [s.name for s in job.skills if s not in user.skills]
-            recommendations.append(job_data)
+    return render_template('job_detail.html', job=job, has_applied=has_applied)
 
-    # Sort by highest match score first
-    recommendations.sort(key=lambda x: float(x['match_score'].strip('%')), reverse=True)
-    
-    return jsonify(recommendations), 200
-
-@job_bp.route("/jobs", methods=["GET"])
-def view_jobs_ui():
-    location = request.args.get("location")
-    skill = request.args.get("skill")
-
-    query = Job.query
-    
-    if location:
-        query = query.filter(Job.location.ilike(f"%{location}%"))
-    
-    if skill:
-        query = query.join(Job.skills).filter(Skill.name.ilike(f"%{skill}%"))
-
-    jobs = query.order_by(Job.created_at.desc()).all()
-
-    # UI Enhancement: If user is logged in via browser, we could calculate scores here too
-    if "text/html" in request.headers.get("Accept", ""):
-        return render_template("jobs.html", jobs=jobs)
-    
-    return jsonify([j.to_dict() for j in jobs]), 200
-
-# ==============================
-# 🛠️ DATABASE & ADMIN ACTIONS
-# ==============================
-
-@job_bp.route("/init-db", methods=["GET"])
-def init_db():
-    try:
-        # Import all models here to ensure they are registered with SQLAlchemy
-        from app.models.company import Company
-        from app.models.user import User 
-        db.create_all()
-        return jsonify({"message": "Database tables created successfully"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@job_bp.route("/api/jobs", methods=["POST"])
-@jwt_required()
-def create_job():
-    try:
-        data = request.get_json()
-        if not data or not all(k in data for k in ("title", "location", "company_id")):
-            return jsonify({"error": "Missing required fields"}), 400
-
-        user_id = get_jwt_identity()
-        user = db.session.get(User, user_id)
-
-        if not user or user.role != "admin":
-            return jsonify({"error": "Unauthorized: Admin access required"}), 403
-
-        from app.models.company import Company
-        company = db.session.get(Company, data["company_id"])
-        if not company:
-            return jsonify({"error": "Invalid company ID"}), 400
-
-        job = Job(
-            title=data["title"],
-            location=data["location"],
-            salary=data.get("salary"),
-            company_id=data["company_id"]
+@job_bp.route("/post-job", methods=["GET", "POST"])
+@login_required
+def post_job():
+    if request.method == "POST":
+        new_job = Job(
+            title=request.form.get("title"),
+            company_name=request.form.get("company_name"),
+            location=request.form.get("location"),
+            salary=request.form.get("salary"),
+            description=request.form.get("description")
         )
 
-        # ADVANCED: Add skills to job during creation
-        if "skill_ids" in data:
-            skills = Skill.query.filter(Skill.id.in_(data["skill_ids"])).all()
-            job.skills.extend(skills)
+        skills_input = request.form.get("skills_required", "")
+        if skills_input:
+            skill_names = [s.strip() for s in skills_input.split(",") if s.strip()]
+            for name in skill_names:
+                # Optimized: Look up or create skill
+                skill = db.session.query(Skill).filter_by(name=name).first()
+                if not skill:
+                    skill = Skill(name=name)
+                    db.session.add(skill)
+                new_job.skills.append(skill)
 
-        db.session.add(job)
+        db.session.add(new_job)
         db.session.commit()
+        flash("Job posted successfully!", "success")
+        return redirect(url_for('job_bp.explore'))
 
-        return jsonify({"message": "Job created with skills", "job": job.to_dict()}), 201
+    return render_template("post_job.html")
 
-    except Exception as e:
+@job_bp.route('/apply/quick/<int:job_id>', methods=['POST'])
+@login_required
+def quick_apply(job_id):
+    if current_user.role != 'seeker':
+        flash("Only job seekers can apply.", "danger")
+        return redirect(url_for('job_bp.explore'))
+
+    existing_app = db.session.query(Application).filter_by(
+        job_id=job_id, 
+        user_id=current_user.id
+    ).first()
+    
+    if existing_app:
+        flash("Already applied!", "info")
+        return redirect(url_for('job_bp.explore'))
+
+    try:
+        new_app = Application(job_id=job_id, user_id=current_user.id)
+        db.session.add(new_app)
+        db.session.commit()
+        flash("Application submitted!", "success")
+    except Exception:
         db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+        flash("Error submitting application.", "danger")
+    
+    return redirect(url_for('job_bp.explore'))
+@job_bp.route('/jobs')
+def list_jobs():
+    # Get search parameters from the URL
+    q = request.args.get('q', '')
+    location = request.args.get('location', '')
+    
+    query = Job.query
+    
+    # Filter logic
+    if q:
+        query = query.filter(Job.title.ilike(f'%{q}%'))
+    if location and location != 'All India':
+        query = query.filter(Job.location.ilike(f'%{location}%'))
+        
+    jobs = query.order_by(Job.posted_date.desc()).all()
+    return render_template('explore.html', jobs=jobs)

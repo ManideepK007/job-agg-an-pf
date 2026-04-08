@@ -1,0 +1,13 @@
+<div class="mt-3">
+    <p class="text-muted small">
+        <i class="bi bi-clock"></i> 
+        Posted on: {{ job.posted_at.strftime('%d %b, %Y') if job.posted_at else 'Recently' }}
+    </p>
+
+    <h6>Required Skills:</h6>
+    {% for skill in job.skills %}
+        <span class="badge rounded-pill bg-light text-dark border me-1">{{ skill.name }}</span>
+    {% else %}
+        <span class="text-muted small">No specific skills listed.</span>
+    {% endfor %}
+</div>

@@ -1,11 +1,11 @@
-# Ignore the virtual environment
-venv/
-env/
-ENV/
-
-# Ignore Python cache
+# Python junk
 __pycache__/
-*.pyc
-
-# Ignore local environment variables (passwords)
+*.py[cod]
+venv/
 .env
+
+# Database
+*.db
+
+# OS junk
+.DS_Store

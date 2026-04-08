@@ -1,95 +1,76 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
+from app.extensions import db
+from app.models import User
+from flask_login import login_user, logout_user, login_required
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# ✅ FIX: Import db from extensions and models from their individual files
+from app.extensions import db
 from app.models.user import User
-from app import db
-from flask_jwt_extended import create_access_token
-import bcrypt
+from app.models.profile import Profile
 
-auth_bp = Blueprint("auth", __name__)
+auth_bp = Blueprint('auth_bp', __name__)
 
-
-# 🔐 REGISTER
-@auth_bp.route("/register", methods=["POST"])
+@auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     data = request.get_json()
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        role = request.form.get('role') # 'seeker' or 'recruiter'
 
-    # ✅ Handle empty body
-    if not data:
-        return jsonify({"error": "Request body is required"}), 400
+        # Check if user already exists
+        user = User.query.filter_by(email=email).first()
+        if user:
+            flash('Email already exists!')
+            return redirect(url_for('auth.register'))
 
-    username = data.get("username")
-    password = data.get("password")
-    role = data.get("role", "user")   # 🔥 role support
+        # Create new user with hashed password (Security First!)
+        # Note: Changed method to 'scrypt' as 'sha256' is deprecated in newer Werkzeug versions
+        new_user = User(
+            email=email, 
+            password=set_password(password),
+            role=role
+        )
+        db.session.add(new_user)
+        db.session.commit()
 
-    # ✅ validation
-    if not username or not password:
-        return jsonify({"error": "Username and password required"}), 400
+        # Create a blank profile automatically for Job Seekers
+        if role == 'seeker':
+            new_profile = Profile(user_id=new_user.id)
+            db.session.add(new_profile)
+            db.session.commit()
 
-    # ✅ check existing user
-    existing_user = User.query.filter_by(username=username).first()
-    if existing_user:
-        return jsonify({"error": "Username already exists"}), 400
+        return redirect(url_for('auth.login'))
+    
+    return render_template('register.html')
 
-    # 🔥 HASH PASSWORD
-    hashed_password = bcrypt.hashpw(
-        password.encode("utf-8"),
-        bcrypt.gensalt()
-    ).decode("utf-8")
-
-    # ✅ create user
-    user = User(
-        username=username,
-        password=hashed_password,
-        role=role
-    )
-
-    db.session.add(user)
-    db.session.commit()
-
-    return jsonify({
-        "message": "User registered",
-        "user": {
-            "id": user.id,
-            "username": user.username,
-            "role": user.role
-        }
-    }), 201
-
-
-# 🔐 LOGIN
-@auth_bp.route("/login", methods=["POST"])
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    data = request.get_json()
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(email=email).first()
+        
+        if not user or not check_password_hash(user.password, password):
+            flash('Please check your login details and try again.')
+            return redirect(url_for('auth_bp.login'))
 
-    # ✅ Handle empty body
-    if not data:
-        return jsonify({"error": "Request body is required"}), 400
+        login_user(user)
+        
+        # Redirect based on ROLE (Precision Routing)
+        if user.role == 'recruiter':
+            # Ensure you have a 'recruiter' blueprint and a 'dashboard' route!
+            return redirect(url_for('recruiter.dashboard'))
+        
+        # For job seekers, they go to the explore page
+        return redirect(url_for('job_bp.explore') if 'job_bp' in str(url_for) else '/')
 
-    username = data.get("username")
-    password = data.get("password")
+    return render_template('login.html')
 
-    if not username or not password:
-        return jsonify({"error": "Username and password required"}), 400
-
-    user = User.query.filter_by(username=username).first()
-
-    if not user:
-        return jsonify({"error": "Invalid username"}), 401
-
-    # 🔥 CHECK HASHED PASSWORD
-    if not bcrypt.checkpw(
-        password.encode("utf-8"),
-        user.password.encode("utf-8")
-    ):
-        return jsonify({"error": "Invalid password"}), 401
-
-    # 🔑 generate token
-    token = create_access_token(identity=str(user.id))
-
-    return jsonify({
-        "access_token": token,
-        "user": {
-            "id": user.id,
-            "username": user.username,
-            "role": user.role
-        }
-    }), 200
+@auth_bp.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))

@@ -1,0 +1,29 @@
+.jobs-container {
+    display: grid;
+    grid-template-columns: 280px 1fr; /* Sidebar width vs Feed */
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.job-card {
+    background: #ffffff;
+    border: 1px solid #e1e4e8;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 4px; /* Minimalist slight roundness */
+    transition: box-shadow 0.2s ease;
+}
+
+.job-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.skill-tag {
+    background: #f1f3f5;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    color: #495057;
+    margin-right: 5px;
+    border-radius: 2px;
+}
